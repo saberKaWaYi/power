@@ -31,8 +31,14 @@ class Connect_Clickhouse:
         atexit.register(self.close)
 
     def login(self):
-        client=Client(host=self.config["clickhouse"]["HOST"],port=self.config["clickhouse"]["PORT"],user=self.config["clickhouse"]["USERNAME"],password=self.config["clickhouse"]["PASSWORD"])
-        return client
+        for i in range(self.config["connection"]["TIMES"]):
+            try:
+                client=Client(host=self.config["clickhouse"]["HOST"],port=self.config["clickhouse"]["PORT"],user=self.config["clickhouse"]["USERNAME"],password=self.config["clickhouse"]["PASSWORD"])
+                return client
+            except:
+                time.sleep(self.config["connection"]["TIME"])
+        logging.error("clickhouse登录失败。")
+        raise Exception("clickhouse登录失败。")
     
     def close(self):
         for i in range(self.config["connection"]["TIMES"]):
@@ -56,30 +62,30 @@ class Connect_Clickhouse:
         logging.error(f"{query}数据获取失败。")
         raise Exception(f"{query}数据获取失败。")
 
-config={
-    "connection":{
-        "TIMES":1000,
-        "TIME":0.1
-    },
-    "clickhouse":{
-        "HOST":"10.216.140.107",
-        "PORT":9000,
-        "USERNAME":"default",
-        "PASSWORD":""
-    }
-}
 # config={
 #     "connection":{
 #         "TIMES":1000,
 #         "TIME":0.1
 #     },
 #     "clickhouse":{
-#         "HOST":"localhost",
-#         "PORT":5001,
+#         "HOST":"10.216.140.107",
+#         "PORT":9000,
 #         "USERNAME":"default",
 #         "PASSWORD":""
 #     }
 # }
+config={
+    "connection":{
+        "TIMES":1000,
+        "TIME":0.1
+    },
+    "clickhouse":{
+        "HOST":"localhost",
+        "PORT":5001,
+        "USERNAME":"default",
+        "PASSWORD":""
+    }
+}
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -103,21 +109,7 @@ def menu_data(request):
     query=f'''
     SELECT city,data_center,room,rack FROM power.power_data WHERE ts >='{start_str}' AND ts<='{end_str}'
     '''
-    data1=conn.query(query).values.tolist()
-    logging.info(data1)
-    query = f'''
-    SELECT city,data_center,room,rack FROM power.power_data limit 1
-    '''
-    data2=conn.query(query).values.tolist()
-    logging.info("333333" * 110)
-    logging.info(data2)
-    query = f'''
-    SELECT city,data_center,room,rack FROM power.power_data
-    '''
-    logging.info("333333"*110)
-    data3=conn.query(query).values.tolist()
-    logging.info(data3)
-    logging.info(config)
+    data=conn.query(query).values.tolist()
     temp={}
     for i in data:
         a,b,c,d=i[0],i[1],i[2],i[3]
