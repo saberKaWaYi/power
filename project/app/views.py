@@ -109,9 +109,9 @@ def menu_data(request):
     query=f'''
     SELECT city,data_center,room,rack FROM power.power_data WHERE ts >='{start_str}' AND ts<='{end_str}'
     '''
-    query = f'''
-    SELECT city,data_center,room,rack FROM power.power_data limit 1
-    '''
+    # query = f'''
+    # SELECT city,data_center,room,rack FROM power.power_data limit 1
+    # '''
     data=conn.query(query).values.tolist()
     logging.info(data)
     logging.info(config)
