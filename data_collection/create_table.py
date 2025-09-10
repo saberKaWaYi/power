@@ -17,7 +17,7 @@ def create_table(config):
         voltage     Float32,     -- 电压 (V)
         current     Float32,     -- 电流 (A)
         power       Float32,     -- 功率 (W)
-        device_ip   String,
+        ip   String,
         brand       String,
         type        String
     )

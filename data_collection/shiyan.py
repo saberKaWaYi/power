@@ -25,9 +25,10 @@ logging.basicConfig(
 
 class Run:
 
-    def __init__(self,config):
-        self.config=config
-        self.zd=get_relationship(self.config)
+    def __init__(self,config1,config2):
+        self.config1=config1
+        self.config2=config2
+        self.zd=get_relationship(self.config1)
         self.result=[]
 
     def run(self):
@@ -244,7 +245,7 @@ class Run:
         return [round(a,2),round(b,2),round(c,2)]
 
 if __name__=="__main__":
-    config={
+    config1={
         "connection":{
             "TIMES":1000,
             "TIME":0.1
@@ -256,5 +257,17 @@ if __name__=="__main__":
             "PASSWORD":"cds-cloud@2017"
         }
     }
-    m=Run(config)
+    config2={
+        "connection":{
+            "TIMES":1000,
+            "TIME":0.1
+        },
+        "clickhouse":{
+            "HOST":"10.216.140.107",
+            "PORT":9000,
+            "USERNAME":"default",
+            "PASSWORD":""
+        }
+    }
+    m=Run(config1,config2)
     m.run()
