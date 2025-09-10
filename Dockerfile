@@ -9,4 +9,6 @@ RUN pip install django djangorestframework clickhouse-driver -i https://pypi.tun
 
 EXPOSE 8000
 
+WORKDIR /app/project
+
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
