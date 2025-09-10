@@ -1,10 +1,11 @@
-FROM dockerhub.capitalonline.net/devops_project/migrate_center:v3.3
+FROM python:3.11-slim
 
 WORKDIR /app
 
 COPY . /app
 
-RUN pip install Django==5.2 djangorestframework==3.16.0 clickhouse-driver pymongo==3.12.0 pandas pymysql requests==2.32.4 kafka-python -i https://mirrors.aliyun.com/pypi/simple
+RUN pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install django djangorestframework clickhouse-driver pymongo==3.12.0 pandas pymysql requests kafka-python -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 EXPOSE 8000
 
