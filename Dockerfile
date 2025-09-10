@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM dockerhub.capitalonline.net/devops_project/migrate_center:v3.3
 
 WORKDIR /app
 
