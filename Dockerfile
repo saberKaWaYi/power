@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY . /app
 
-RUN pip install --upgrade pip
-RUN pip install django djangorestframework clickhouse-driver
+RUN pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install django djangorestframework clickhouse-driver -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 EXPOSE 8000
 
