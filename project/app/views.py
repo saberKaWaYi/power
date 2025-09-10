@@ -31,14 +31,8 @@ class Connect_Clickhouse:
         atexit.register(self.close)
 
     def login(self):
-        for i in range(self.config["connection"]["TIMES"]):
-            try:
-                client=Client(host=self.config["clickhouse"]["HOST"],port=self.config["clickhouse"]["PORT"],user=self.config["clickhouse"]["USERNAME"],password=self.config["clickhouse"]["PASSWORD"])
-                return client
-            except:
-                time.sleep(self.config["connection"]["TIME"])
-        logging.error("clickhouse登录失败。")
-        raise Exception("clickhouse登录失败。")
+        client=Client(host=self.config["clickhouse"]["HOST"],port=self.config["clickhouse"]["PORT"],user=self.config["clickhouse"]["USERNAME"],password=self.config["clickhouse"]["PASSWORD"])
+        return client
     
     def close(self):
         for i in range(self.config["connection"]["TIMES"]):
