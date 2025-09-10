@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY . /app
 
-RUN pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
-RUN pip install django djangorestframework clickhouse-driver pymongo==3.12.0 pandas pymysql requests kafka-python -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install --upgrade pip -i http://mirrors.aliyun.com/pypi/simple
+RUN pip install django djangorestframework clickhouse-driver pymongo==3.12.0 pandas pymysql requests kafka-python -i http://mirrors.aliyun.com/pypi/simple
 
 EXPOSE 8000
 
