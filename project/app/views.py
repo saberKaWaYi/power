@@ -62,30 +62,30 @@ class Connect_Clickhouse:
         logging.error(f"{query}数据获取失败。")
         raise Exception(f"{query}数据获取失败。")
 
-# config={
-#     "connection":{
-#         "TIMES":1000,
-#         "TIME":0.1
-#     },
-#     "clickhouse":{
-#         "HOST":"10.216.140.107",
-#         "PORT":9000,
-#         "USERNAME":"default",
-#         "PASSWORD":""
-#     }
-# }
 config={
     "connection":{
         "TIMES":1000,
         "TIME":0.1
     },
     "clickhouse":{
-        "HOST":"localhost",
-        "PORT":5001,
+        "HOST":"10.216.140.107",
+        "PORT":9000,
         "USERNAME":"default",
         "PASSWORD":""
     }
 }
+# config={
+#     "connection":{
+#         "TIMES":1000,
+#         "TIME":0.1
+#     },
+#     "clickhouse":{
+#         "HOST":"localhost",
+#         "PORT":5001,
+#         "USERNAME":"default",
+#         "PASSWORD":""
+#     }
+# }
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
