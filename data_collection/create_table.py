@@ -16,7 +16,10 @@ def create_table(config):
         ts          DateTime,    -- 收集时间
         voltage     Float32,     -- 电压 (V)
         current     Float32,     -- 电流 (A)
-        power       Float32      -- 功率 (W)
+        power       Float32,     -- 功率 (W)
+        device_ip   String,
+        brand       String,
+        type        String
     )
     ENGINE = MergeTree
     PARTITION BY toYYYYMMDD(ts)
