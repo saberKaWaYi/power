@@ -62,30 +62,30 @@ class Connect_Clickhouse:
         logging.error(f"{query}数据获取失败。")
         raise Exception(f"{query}数据获取失败。")
 
-config={
-    "connection":{
-        "TIMES":1000,
-        "TIME":0.1
-    },
-    "clickhouse":{
-        "HOST":"10.216.140.107",
-        "PORT":9000,
-        "USERNAME":"default",
-        "PASSWORD":""
-    }
-}
 # config={
 #     "connection":{
 #         "TIMES":1000,
 #         "TIME":0.1
 #     },
 #     "clickhouse":{
-#         "HOST":"localhost",
-#         "PORT":5001,
+#         "HOST":"10.216.140.107",
+#         "PORT":9000,
 #         "USERNAME":"default",
 #         "PASSWORD":""
 #     }
 # }
+config={
+    "connection":{
+        "TIMES":1000,
+        "TIME":0.1
+    },
+    "clickhouse":{
+        "HOST":"localhost",
+        "PORT":5001,
+        "USERNAME":"default",
+        "PASSWORD":""
+    }
+}
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -108,6 +108,9 @@ def menu_data(request):
     end_str=end_time.strftime('%Y-%m-%d %H:%M:%S')
     query=f'''
     SELECT city,data_center,room,rack FROM power.power_data WHERE ts >='{start_str}' AND ts<='{end_str}'
+    '''
+    query = f'''
+    SELECT city,data_center,room,rack FROM power.power_data limit 1
     '''
     data=conn.query(query).values.tolist()
     logging.info(data)
