@@ -109,6 +109,7 @@ def menu_data(request):
     query=f'''
     SELECT city,data_center,room,rack FROM power.power_data WHERE ts >='{start_str}' AND ts<='{end_str}'
     '''
+    logging.info(query)
     data=conn.query(query).values.tolist()
     temp={}
     for i in data:
