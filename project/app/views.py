@@ -102,14 +102,13 @@ def menu_data(request):
     zd["code"]=200;zd["msg"]=""
     conn=Connect_Clickhouse(config)
     client=conn.client
-    end_time=datetime.now()
-    start_time=end_time-timedelta(days=1)
+    end_time=datetime.now()+timedelta(days=1)
+    start_time=end_time-timedelta(days=2)
     start_str=start_time.strftime('%Y-%m-%d %H:%M:%S')
     end_str=end_time.strftime('%Y-%m-%d %H:%M:%S')
     query=f'''
     SELECT city,data_center,room,rack FROM power.power_data WHERE ts >='{start_str}' AND ts<='{end_str}'
     '''
-    logging.info(query)
     data=conn.query(query).values.tolist()
     temp={}
     for i in data:
