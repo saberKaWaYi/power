@@ -111,6 +111,7 @@ def menu_data(request):
     '''
     logging.info(query)
     data=conn.query(query).values.tolist()
+    logging.info(data)
     temp={}
     for i in data:
         a,b,c,d=i[0],i[1],i[2],i[3]
