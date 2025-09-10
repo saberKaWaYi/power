@@ -1,8 +1,6 @@
 services:
   web:
-    build: ./project
+    build: .
     container_name: django_app
     ports:
       - "8000:8000"
-    volumes:
-      - ./project:/app
