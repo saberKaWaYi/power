@@ -125,3 +125,57 @@ def menu_data(request):
         zd_temp["rack_list"]=sorted(list(temp[i]))
         zd["data"].append(zd_temp)
     return Response(zd)
+
+def demo(lt):
+    c=sum([i[2] for i in lt])
+    if c==0:
+        return [0.00,0.00,0.00]
+    b=sum([i[1] for i in lt])
+    a=sum([i[0]*i[2] for i in lt])/c
+    return [round(a,2),round(b,2),round(c,2)]
+
+@api_view(['POST'])
+def rack_power(request):
+    zd={};zd["code"]=200;zd["msg"]="";zd["data"]={}
+    zd["data"]["power_data"]=[]
+    begin_time=request.data["begin_time"];end_time=request.data["end_time"]
+    city=request.data["city"];data_center=request.data["data_center"];room=request.data["room"];rack=request.data["rack"]
+    query=f'''
+    SELECT voltage,current,power,ts FROM power.power_data WHERE ts >='{begin_time}' AND ts<='{end_time}' AND city='{city}' AND data_center='{data_center}' AND room='{room}' AND rack='{rack}' ORDER BY ts ASC
+    '''
+    conn=Connect_Clickhouse(config)
+    client=conn.client
+    data=conn.query(query)[["voltage","current","power","ts"]].values.tolist()
+    temp={}
+    for i in data:
+        if i[3] not in temp:
+            temp[i[3]]=[]
+        temp[i[3]].append([eval(i[0]),eval(i[1]),eval(i[2])])
+    for i in temp:
+        temp[i]=demo(temp[i])
+    data=[]
+    for i in temp:
+        data.append([temp[i][0],temp[i][1],temp[i][2],i])
+    data=pd.DataFrame(data,columns=["voltage","current","power","ts"])
+    temp={}
+    voltage=data["voltage"].values.tolist()
+    temp["max"]=max(voltage);temp["min"]=min(voltage);temp["name"]="V";temp["unit"]="V"
+    lt1=data["ts"].values.tolist();lt1.insert(0,"time")
+    lt2=voltage;lt2.insert(0,"V")
+    temp["data"]=[lt1,lt2]
+    zd["data"]["power_data"].append(temp)
+    temp={}
+    current=data["current"].values.tolist()
+    temp["max"]=max(current);temp["min"]=min(current);temp["name"]="A";temp["unit"]="A"
+    lt1=data["ts"].values.tolist();lt1.insert(0,"time")
+    lt2=current;lt2.insert(0,"A")
+    temp["data"]=[lt1,lt2]
+    zd["data"]["power_data"].append(temp)
+    temp={}
+    power=data["power"].values.tolist()
+    temp["max"]=max(power);temp["min"]=min(power);temp["name"]="W";temp["unit"]="W"
+    lt1=data["ts"].values.tolist();lt1.insert(0,"time")
+    lt2=power;lt2.insert(0,"W")
+    temp["data"]=[lt1,lt2]
+    zd["data"]["power_data"].append(temp)
+    return Response(zd)
