@@ -109,7 +109,6 @@ def menu_data(request):
     query=f'''
     SELECT city,data_center,room,rack FROM power.power_data WHERE ts >='{start_str}' AND ts<='{end_str}'
     '''
-    logging.info(query)
     data=conn.query(query).values.tolist()
     logging.info(data)
     temp={}
@@ -126,5 +125,4 @@ def menu_data(request):
         zd_temp["name"]=i
         zd_temp["rack_list"]=sorted(list(temp[i]))
         zd["data"].append(zd_temp)
-    logging.info(temp)
     return Response(zd)
