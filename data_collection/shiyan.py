@@ -2,7 +2,9 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from get_relationship import get_relationship
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor,as_completed
+from connect import Connect_Clickhouse
 import requests
 import subprocess
 from redfish import Dell,Inspur,Xfusion
@@ -28,6 +30,7 @@ class Run:
     def __init__(self,config1,config2):
         self.config1=config1
         self.config2=config2
+        self.time_=datetime.now()
         self.zd=get_relationship(self.config1)
         self.result=[]
 
@@ -38,7 +41,23 @@ class Run:
                 pool.append(executor.submit(self.fc,i))
             for task in as_completed(pool):
                 task.result()
-        print(self.result)
+        conn=Connect_Clickhouse(self.config2)
+        client=conn.client
+        insert_sql="""
+        INSERT INTO power.power_data
+        (city, data_center, room, rack, hostname, ts, voltage, current, power, ip, brand, type)
+        VALUES
+        """
+        values=[]
+        for item in self.result:
+            values.append(
+                f"('{item['city']}', '{item['data_center']}', '{item['room']}', '{item['rack']}', "
+                f"'{item['hostname']}', '{item['ts'].strftime('%Y-%m-%d %H:%M:%S')}', "
+                f"{item['voltage']}, {item['current']}, {item['power']}, "
+                f"'{item['ip']}', '{item['brand']}', '{item['type']}')"
+            )
+        insert_sql+=",".join(values)
+        client.execute(insert_sql)
 
     def fc(self,key):
         for value in self.zd[key]:
@@ -53,11 +72,13 @@ class Run:
                 logging.error("="*50+"/n"+f"{key}未知type。/n"+"="*50)
                 continue
             temp_zd["hostname"]=value[0]
-            temp_zd["ip"]=value[1]
-            temp_zd["brand"]=value[2]
+            temp_zd["ts"]=self.time_
             temp_zd["voltage"]=temp[0]
             temp_zd["current"]=temp[1]
             temp_zd["power"]=temp[2]
+            temp_zd["ip"]=value[1]
+            temp_zd["brand"]=value[2]
+            temp_zd["type"]=value[-1]
             self.result.append(temp_zd)
 
     def fc1(self,info):
