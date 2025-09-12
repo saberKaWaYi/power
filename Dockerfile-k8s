@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM dockerhub.capitalonline.net/production_base/base-python3.10:v1
 RUN mkdir -p /app
 ADD . /app
 WORKDIR /app/project
