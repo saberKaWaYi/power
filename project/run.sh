@@ -1,8 +1,5 @@
 #!/bin/bash
 
-set -o errexit
-
-service cron start
 
 web(){
     touch /var/log/web.log
