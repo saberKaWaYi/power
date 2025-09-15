@@ -1,7 +1,7 @@
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-from get_relationship import get_relationship
+from get_relationship import get_relationship,get_ObjectId
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor,as_completed
 from connect import Connect_Clickhouse
@@ -31,7 +31,7 @@ class Run:
         self.config1=config1
         self.config2=config2
         self.time_=datetime.now()
-        self.zd=get_relationship(self.config1,"庆阳")
+        self.zd=get_relationship(self.config1,get_ObjectId(self,config1,"庆阳"))
         self.result=[]
 
     def run(self):
