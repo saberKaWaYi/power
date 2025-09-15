@@ -19,9 +19,10 @@
 import requests
 
 if __name__=="__main__":
+    hostname="CNIQN-POD235-F69-CL-19"
     url_post='http://10.213.136.111:40061/network_app/distribute_config/exec_cmd/'
     config={
-        "device_hostname":"CNIQN-POD235-F69-CL-19",
+        "device_hostname":hostname,
         "operator":"devops",
         "is_edit":False,
         "cmd":""
