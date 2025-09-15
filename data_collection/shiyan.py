@@ -65,7 +65,8 @@ class Run:
             temp_lt=key.split("|")
             temp_zd["city"]=temp_lt[0];temp_zd["data_center"]=temp_lt[1];temp_zd["room"]=temp_lt[2];temp_zd["rack"]=temp_lt[3]
             if value[-1]=="network":
-                temp=self.fc1([value[0],value[1],value[2]])
+                temp=[0.00,0.00,0.00]
+                # temp=self.fc1([value[0],value[1],value[2]])
             elif value[-1]=="server":
                 temp=self.fc2([value[0],value[1],value[2]])
             else:
