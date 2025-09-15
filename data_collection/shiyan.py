@@ -31,7 +31,7 @@ class Run:
         self.config1=config1
         self.config2=config2
         self.time_=datetime.now()
-        self.zd=get_relationship(self.config1)
+        self.zd=get_relationship(self.config1,"庆阳")
         self.result=[]
 
     def run(self):
