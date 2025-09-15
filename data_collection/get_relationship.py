@@ -2,7 +2,7 @@ from connect import Connect_Mongodb
 from bson import ObjectId
 import pandas as pd
 
-def get_relationship(config):
+def get_relationship(config,city_ObjectId):
     conn=Connect_Mongodb(config)
     pipeline=[
         {
@@ -37,8 +37,8 @@ def get_relationship(config):
     ]
     jh1=set(pd.DataFrame(list(conn.db.cds_ci_att_value_network.aggregate(pipeline))).astype(str)["hostname"].values.tolist())
     jh2=set(pd.DataFrame(list(conn.db.cds_ci_att_value_server.aggregate(pipeline))).astype(str)["hostname"].values.tolist())
-    data1=conn.get_collection("cds_ci_location_detail",{"status":1,"ci_name":"network","position_id":ObjectId("65ea7f32a66cd304a5d7facf")},{"position_id":1,"data_center_id":1,"room_id":1,"rack_id":1,"device_id":1})[["position_id","data_center_id","room_id","rack_id","device_id"]].values.tolist()
-    data2=conn.get_collection("cds_ci_location_detail",{"status":1,"ci_name":"server","position_id":ObjectId("65ea7f32a66cd304a5d7facf")},{"position_id":1,"data_center_id":1,"room_id":1,"rack_id":1,"device_id":1})[["position_id","data_center_id","room_id","rack_id","device_id"]].values.tolist()
+    data1=conn.get_collection("cds_ci_location_detail",{"status":1,"ci_name":"network","position_id":ObjectId(city_ObjectId)},{"position_id":1,"data_center_id":1,"room_id":1,"rack_id":1,"device_id":1})[["position_id","data_center_id","room_id","rack_id","device_id"]].values.tolist()
+    data2=conn.get_collection("cds_ci_location_detail",{"status":1,"ci_name":"server","position_id":ObjectId(city_ObjectId)},{"position_id":1,"data_center_id":1,"room_id":1,"rack_id":1,"device_id":1})[["position_id","data_center_id","room_id","rack_id","device_id"]].values.tolist()
     city=conn.get_collection("cds_ci_att_value_position",{"status":1},{"_id":1,"city":1})[["_id","city"]].values.tolist()
     city_dict=dict(zip([i[0] for i in city],[i[1] for i in city]))
     data_center=conn.get_collection("cds_ci_att_value_data_center",{"status":1},{"_id":1,"data_center_name":1})[["_id","data_center_name"]].values.tolist()
@@ -80,6 +80,11 @@ def get_relationship(config):
         del zd[i]
     return zd
 
+def get_ObjectId(city_name):
+    conn=Connect_Mongodb(config)
+    city_ObjectId=conn.get_collection("cds_ci_att_value_position",{"status":1,"city":"庆阳"},{"_id":1})["_id"].values.tolist()[0]
+    return city_ObjectId
+
 if __name__=="__main__":
     config={
         "connection":{
@@ -93,5 +98,5 @@ if __name__=="__main__":
             "PASSWORD":"cds-cloud@2017"
         }
     }
-    zd=get_relationship(config)
+    zd=get_relationship(config,get_ObjectId("庆阳"))
     print(zd)
