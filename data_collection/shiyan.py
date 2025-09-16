@@ -30,8 +30,8 @@ class Run:
     def __init__(self,config1,config2):
         self.config1=config1
         self.config2=config2
-        self.time_=datetime.now()
         self.zd=get_relationship(self.config1,get_ObjectId(self.config1,"庆阳"))
+        self.time_=datetime.now()
         self.result=[]
 
     def run(self):
@@ -41,6 +41,9 @@ class Run:
                 pool.append(executor.submit(self.fc,i))
             for task in as_completed(pool):
                 task.result()
+        #########################
+        return
+        #########################
         conn=Connect_Clickhouse(self.config2)
         client=conn.client
         insert_sql="""
@@ -65,12 +68,15 @@ class Run:
             temp_lt=key.split("|")
             temp_zd["city"]=temp_lt[0];temp_zd["data_center"]=temp_lt[1];temp_zd["room"]=temp_lt[2];temp_zd["rack"]=temp_lt[3]
             if value[-1]=="network":
-                temp=[0.00,0.00,0.00]
+                temp=self.fc1_new([value[0],value[1],value[2]])
                 # temp=self.fc1([value[0],value[1],value[2]])
             elif value[-1]=="server":
+                #########################
+                continue
+                #########################
                 temp=self.fc2([value[0],value[1],value[2]])
             else:
-                logging.error("="*50+"/n"+f"{key}未知type。/n"+"="*50)
+                logging.error("="*50+"/n"+f"{value[-1]}未知type。/n"+"="*50)
                 continue
             temp_zd["hostname"]=value[0]
             temp_zd["ts"]=self.time_
@@ -81,6 +87,50 @@ class Run:
             temp_zd["brand"]=value[2]
             temp_zd["type"]=value[-1]
             self.result.append(temp_zd)
+
+    def fc1_new(self,info):
+        try:
+            hostname,ip,brand=info[0].strip(),info[1].strip(),info[2].lower().strip()
+            if hostname.lower()=="none" or hostname.lower()=="null" or hostname.lower()=="nan" or hostname=="" or hostname=="-" or hostname=="--" or hostname=="---" or hostname==None:
+                return [0.00,0.00,0.00]
+            if "." not in ip:
+                return [0.00,0.00,0.00]
+            if brand=="" or brand=="-" or brand=="--" or brand=="---" or brand=="none" or brand=="null" or brand=="nan" or brand==None:
+                return [0.00,0.00,0.00]
+            #########################
+            if brand not in ["huawei","huarong"]:
+                return [0.00,0.00,0.00]
+            #########################
+            if brand=="huawei" or brand=="huarong":
+                result=[]
+                command_list=[" 1.3.6.1.4.1.2011.5.25.31.1.1.18.1.8"," 1.3.6.1.4.1.2011.5.25.31.1.1.18.1.7"," 1.3.6.1.4.1.2011.6.157.1.6"]
+                for command in command_list:
+                    command="snmpwalk -v 2c -c QAZXSWedc "+ip+command
+                    process=subprocess.run(
+                        command,
+                        shell=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        universal_newlines=True
+                    )
+                    temp=[]
+                    for line in process.stdout.strip().split("\n"):
+                        s=line[line.index(":")+1:].strip().strip("\"")
+                        temp.append(eval(s))
+                    if int(command[-1])==7:
+                        result.append(round(sum(temp),2)/1000)
+                        continue
+                    result.append(round(sum(temp)/len(temp),2)/1000)
+                print([hostname,brand,result,ip])
+                return result
+        except Exception as e:
+            #########################
+            # logging.error("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
+            #########################
+            #########################
+            print("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
+            #########################
+            return [0.00,0.00,0.00]
 
     def fc1(self,info):
         try:
@@ -239,24 +289,21 @@ class Run:
                 return self.demo(m.get_psu_detail())
             except Exception as e:
                 logging.error("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
-                return [0.00,0.00,0.00]
         elif brand=="inspur":
             try:
                 m=Inspur(ip)
                 return self.demo(m.get_psu_detail())
             except Exception as e:
                 logging.error("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
-                return [0.00,0.00,0.00]
         elif brand=="xfusion":
             try:
                 m=Xfusion(ip)
                 return self.demo(m.get_psu_detail())
             except Exception as e:
                 logging.error("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
-                return [0.00,0.00,0.00]
         else:
             logging.error("="*50+"\n"+"未知品牌"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+"="*50)
-            return [0.00,0.00,0.00]
+        return [0.00,0.00,0.00]
 
     def demo(self,lt):
         c=sum([i[2] for i in lt])
