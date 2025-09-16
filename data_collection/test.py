@@ -76,7 +76,7 @@ if __name__=="__main__":
     url_post='http://10.213.136.111:40061/network_app/distribute_config/exec_cmd/'
     config={
         "device_hostname":hostname,
-        "operator":"devops",
+        "operator":"LCL",
         "is_edit":False,
         "cmd":""
     }
@@ -89,6 +89,8 @@ if __name__=="__main__":
     if client_names:
         temp=[]
         for client_name in client_names:
+            if client_name["operator"]!="LCL":
+                continue
             temp.append((client_names[client_name]["client_name"],client_names[client_name]["created_at"]))
         temp.sort(key=lambda x:x[1])
         config["client_name"]=temp[-1][0]
