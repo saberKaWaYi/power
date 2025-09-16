@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor,as_completed
 from connect import Connect_Clickhouse
 import requests
 import subprocess
-from redfish import Dell,Inspur,Xfusion
+from redfish import Dell,Inspur,Xfusion,AMI
 
 log_dir="logs"
 if not os.path.exists(log_dir):
@@ -94,7 +94,7 @@ class Run:
             url_post='http://10.213.136.111:40061/network_app/distribute_config/exec_cmd/'
             config={
                 "device_hostname":hostname,
-                "operator":"devops",
+                "operator":"LCL",
                 "is_edit":False,
                 "cmd":""
             }
@@ -108,6 +108,8 @@ class Run:
             if client_names:
                 temp=[]
                 for client_name in client_names:
+                    if client_name["operator"]!="LCL":
+                        continue
                     temp.append((client_names[client_name]["client_name"],client_names[client_name]["created_at"]))
                 temp.sort(key=lambda x:x[1])
                 config["client_name"]=temp[-1][0]
@@ -250,6 +252,12 @@ class Run:
         elif brand=="xfusion":
             try:
                 m=Xfusion(ip)
+                return self.demo(m.get_psu_detail())
+            except Exception as e:
+                logging.error("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
+        elif brand=="ami":
+            try:
+                m=AMI(ip)
                 return self.demo(m.get_psu_detail())
             except Exception as e:
                 logging.error("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
