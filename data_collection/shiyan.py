@@ -41,9 +41,6 @@ class Run:
                 pool.append(executor.submit(self.fc,i))
             for task in as_completed(pool):
                 task.result()
-        #########################
-        return
-        #########################
         conn=Connect_Clickhouse(self.config2)
         client=conn.client
         insert_sql="""
@@ -68,12 +65,8 @@ class Run:
             temp_lt=key.split("|")
             temp_zd["city"]=temp_lt[0];temp_zd["data_center"]=temp_lt[1];temp_zd["room"]=temp_lt[2];temp_zd["rack"]=temp_lt[3]
             if value[-1]=="network":
-                temp=self.fc1_new([value[0],value[1],value[2]])
-                # temp=self.fc1([value[0],value[1],value[2]])
+                temp=self.fc1([value[0],value[1],value[2]])
             elif value[-1]=="server":
-                #########################
-                continue
-                #########################
                 temp=self.fc2([value[0],value[1],value[2]])
             else:
                 logging.error("="*50+"/n"+f"{value[-1]}未知type。/n"+"="*50)
@@ -87,50 +80,6 @@ class Run:
             temp_zd["brand"]=value[2]
             temp_zd["type"]=value[-1]
             self.result.append(temp_zd)
-
-    def fc1_new(self,info):
-        try:
-            hostname,ip,brand=info[0].strip(),info[1].strip(),info[2].lower().strip()
-            if hostname.lower()=="none" or hostname.lower()=="null" or hostname.lower()=="nan" or hostname=="" or hostname=="-" or hostname=="--" or hostname=="---" or hostname==None:
-                return [0.00,0.00,0.00]
-            if "." not in ip:
-                return [0.00,0.00,0.00]
-            if brand=="" or brand=="-" or brand=="--" or brand=="---" or brand=="none" or brand=="null" or brand=="nan" or brand==None:
-                return [0.00,0.00,0.00]
-            #########################
-            if brand not in ["huawei","huarong"]:
-                return [0.00,0.00,0.00]
-            #########################
-            if brand=="huawei" or brand=="huarong":
-                result=[]
-                command_list=[" 1.3.6.1.4.1.2011.5.25.31.1.1.18.1.8"," 1.3.6.1.4.1.2011.5.25.31.1.1.18.1.7"," 1.3.6.1.4.1.2011.6.157.1.6"]
-                for command in command_list:
-                    command="snmpwalk -v 2c -c QAZXSWedc "+ip+command
-                    process=subprocess.run(
-                        command,
-                        shell=True,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        universal_newlines=True
-                    )
-                    temp=[]
-                    for line in process.stdout.strip().split("\n"):
-                        s=line[line.index(":")+1:].strip().strip("\"")
-                        temp.append(eval(s))
-                    if int(command[-1])==7:
-                        result.append(round(sum(temp),2)/1000)
-                        continue
-                    result.append(round(sum(temp)/len(temp),2)/1000)
-                print([hostname,brand,result,ip])
-                return result
-        except Exception as e:
-            #########################
-            # logging.error("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
-            #########################
-            #########################
-            print("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
-            #########################
-            return [0.00,0.00,0.00]
 
     def fc1(self,info):
         try:
@@ -192,23 +141,26 @@ class Run:
                     data=response.json()["data"]["cmd_result"]
                 print(data)
             elif brand=="huawei" or brand=="huarong":
-                config["cmd"]="display device power"
-                response=requests.post(url_post,json=config)
-                data=response.json()["data"]["cmd_result"]
-                if not data and "client_name" in config:
-                    del config["client_name"]
-                    response=requests.post(url_post,json=config)
-                    data=response.json()["data"]["cmd_result"]
-                temp=data.split("\n")
-                for i in temp:
-                    if "Error" in i:
-                        logging.error("="*50+"\n"+"命令不对"+"\n"+hostname+"\n"+"="*50)
-                        return [0.00,0.00,0.00]
-                    if "Supply" not in i:
+                result=[]
+                command_list=[" 1.3.6.1.4.1.2011.5.25.31.1.1.18.1.8"," 1.3.6.1.4.1.2011.5.25.31.1.1.18.1.7"," 1.3.6.1.4.1.2011.6.157.1.6"]
+                for command in command_list:
+                    command="snmpwalk -v 2c -c QAZXSWedc "+ip+command
+                    process=subprocess.run(
+                        command,
+                        shell=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        universal_newlines=True
+                    )
+                    temp=[]
+                    for line in process.stdout.strip().split("\n"):
+                        s=line[line.index(":")+1:].strip().strip("\"")
+                        temp.append(eval(s))
+                    if int(command[-1])==7:
+                        result.append(round(sum(temp),2)/1000)
                         continue
-                    temp_temp=i.split()
-                    j=temp_temp.index("Supply")
-                    result.append([eval(temp_temp[j+2]),eval(temp_temp[j+1]),eval(temp_temp[j+3])])
+                    result.append(round(sum(temp)/len(temp),2)/1000)
+                return result
             elif brand=="junos":
                 config["cmd"]="show chassis environment pem"
                 response=requests.post(url_post,json=config)
