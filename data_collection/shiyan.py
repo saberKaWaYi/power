@@ -90,6 +90,10 @@ class Run:
                 return [0.00,0.00,0.00]
             if brand=="" or brand=="-" or brand=="--" or brand=="---" or brand=="none" or brand=="null" or brand=="nan" or brand==None:
                 return [0.00,0.00,0.00]
+            ##################################################
+            if brand not in ["huawei","fenghuo"]:
+                return [0.00,0.00,0.00]
+            ##################################################
             result=[]
             url_post='http://10.213.136.111:40061/network_app/distribute_config/exec_cmd/'
             config={
