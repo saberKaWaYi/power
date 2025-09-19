@@ -78,13 +78,13 @@ class Run:
             else:
                 logging.error("="*50+"/n"+f"{value[-1]}未知type。/n"+"="*50)
                 continue
-            temp_zd["hostname"]=value[0]
+            temp_zd["hostname"]="-".join([i.strip() for i in value[0].split("-")])
             temp_zd["ts"]=self.time_
             temp_zd["voltage"]=temp[0]
             temp_zd["current"]=temp[1]
             temp_zd["power"]=temp[2]
-            temp_zd["ip"]=value[1]
-            temp_zd["brand"]=value[2]
+            temp_zd["ip"]=value[1].strip()
+            temp_zd["brand"]=value[2].lower().strip()
             temp_zd["type"]=value[-1]
             self.result.append(temp_zd)
 
