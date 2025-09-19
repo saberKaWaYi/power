@@ -83,10 +83,7 @@ class Connect_Mysql:
     def login(self):
         for i in range(self.config["connection"]["TIMES"]):
             try:
-                if self.config["mysql"].get("DATABASE",None)==None:
-                    client=connect(host=self.config["mysql"]["HOST"],port=self.config["mysql"]["PORT"],user=self.config["mysql"]["USERNAME"],password=self.config["mysql"]["PASSWORD"],database="nebula_graph",charset="utf8",cursorclass=DictCursor)
-                else:
-                    client=connect(host=self.config["mysql"]["HOST"],port=self.config["mysql"]["PORT"],user=self.config["mysql"]["USERNAME"],password=self.config["mysql"]["PASSWORD"],database=self.config["mysql"]["DATABASE"],charset="utf8",cursorclass=DictCursor)
+                client=connect(host=self.config["mysql"]["HOST"],port=self.config["mysql"]["PORT"],user=self.config["mysql"]["USERNAME"],password=self.config["mysql"]["PASSWORD"],charset="utf8",cursorclass=DictCursor)
                 return client
             except:
                 time.sleep(self.config["connection"]["TIME"])
