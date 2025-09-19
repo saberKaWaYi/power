@@ -341,6 +341,8 @@ class Xfusion:
             logging.error("="*50+"\n"+self.idrac_ip+"\n"+str(e)+"\n"+"="*50)
             return [[0.00,0.00,0.00]]
 
+from tool import fc
+
 class AMI:
 
     def __init__(self,idrac_ip,username,password):
@@ -409,6 +411,8 @@ class AMI:
             )
             if response.status_code==200:
                 lt=response.json()["PowerSupplies"]
+                if "PowerInputWatts" not in lt[0]:
+                    return fc(self.idrac_ip,self.username,self.password)
                 result=[]
                 for i in lt:
                     result.append([i["LineInputVoltage"],round(i["PowerInputWatts"]/i["LineInputVoltage"],2),i["PowerInputWatts"]])

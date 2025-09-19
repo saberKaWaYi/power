@@ -39,7 +39,7 @@ class Run:
         self.result=[]
 
     def run(self):
-        with ThreadPoolExecutor(max_workers=50) as executor:
+        with ThreadPoolExecutor(max_workers=100) as executor:
             pool=[]
             for i in self.zd1:
                 pool.append(executor.submit(self.fc,i))
