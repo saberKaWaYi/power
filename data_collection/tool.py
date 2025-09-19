@@ -14,7 +14,7 @@ def fc(idrac_ip,username,password):
         if "vin" in line.lower():
             a.append(eval(line.split("|")[1]))
         if "pin" in line.lower():
-            c+=eval(eval(line.split("|")[1]))
+            c+=eval(line.split("|")[1])
     a=sum(a)/len(a);b=c/a
     return [[round(a,2),round(b,2),round(c,2)]]
 
