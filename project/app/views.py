@@ -173,10 +173,10 @@ def rack_power(request):
         temp["data"]=[lt1,lt2]
         zd["data"]["power_data"].append(temp)
         temp={}
-        power=data["power"].values.tolist()
-        temp["max"]=max(power);temp["min"]=min(power);temp["name"]="W";temp["unit"]="W"
+        power=[i/1000 for i in data["power"].values.tolist()]
+        temp["max"]=max(power);temp["min"]=min(power);temp["name"]="KW";temp["unit"]="KW"
         lt1=data["ts"].values.tolist();lt1.insert(0,"time")
-        lt2=power;lt2.insert(0,"W")
+        lt2=power;lt2.insert(0,"KW")
         temp["data"]=[lt1,lt2]
         zd["data"]["power_data"].append(temp)
     except:
