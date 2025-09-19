@@ -11,10 +11,10 @@ def fc(idrac_ip,username,password):
     )
     a=[];b=0;c=0
     for line in process.stdout.strip().split("\n"):
-        if "Vin" in line:
+        if "vin" in line.lower():
             a.append(eval(line.split("|")[1]))
-        if "Pin" in line:
-            c+=eval(line.split("|")[1])
+        if "pin" in line.lower():
+            c+=eval(eval(line.split("|")[1]))
     a=sum(a)/len(a);b=c/a
     return [[round(a,2),round(b,2),round(c,2)]]
 
