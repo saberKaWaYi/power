@@ -71,3 +71,8 @@
 #         response=requests.post(url_post,json=config)
 #         data=response.json()["data"]["cmd_result"]
 #     print("测试成功")
+from redfish import AMI
+
+if __name__=="__main__":
+    m=AMI("10.194.26.12","ADMIN","ADMIN@123")
+    print(m.get_psu_detail())
