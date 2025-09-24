@@ -62,7 +62,7 @@ def fc(idrac_ip,username,password):
         }
         detail_url=f"{BMC_HOST}/api/detail_sensors_readings"
         p=[];v=[]
-        for _ in range(24):
+        for _ in range(18):
             data=sess.get(detail_url,headers=api_headers,timeout=15).json()
             for j in data:
                 if j["name"]=="SYS_Total_Power":
@@ -70,8 +70,7 @@ def fc(idrac_ip,username,password):
                 if "PSU" in j["name"] and "Vin" in j["name"]:
                     v.append(j["reading"])
             time.sleep(5)
-        p.sort(reverse=True)
-        p=p[len(p)//4];v=sum(v)/len(v)
+        p=max(p);v=sum(v)/len(v)
         return [[round(v,2),round(p/v,2),round(p,2)]]
     except:
         return [[0.00,0.00,0.00]]
