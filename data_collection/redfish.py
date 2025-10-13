@@ -412,7 +412,7 @@ class AMI:
             if response.status_code==200:
                 lt=response.json()["PowerSupplies"]
                 if "PowerInputWatts" not in lt[0]:
-                    return fc(self.idrac_ip,self.username,self.password)
+                    return fc1(self.idrac_ip,self.username,self.password)
                 result=[]
                 for i in lt:
                     result.append([i["LineInputVoltage"],round(i["PowerInputWatts"]/i["LineInputVoltage"],2),i["PowerInputWatts"]])
