@@ -341,7 +341,7 @@ class Xfusion:
             logging.error("="*50+"\n"+self.idrac_ip+"\n"+str(e)+"\n"+"="*50)
             return [[0.00,0.00,0.00]]
 
-from tool import fc
+from tool import fc1
 
 class AMI:
 

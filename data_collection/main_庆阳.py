@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor,as_completed
 import requests
 import subprocess
 from redfish import *
+from tool import fc2
 
 log_dir="logs"
 if not os.path.exists(log_dir):
@@ -222,6 +223,12 @@ class Run:
                 return [0.00,0.00,0.00]
             if brand=="" or brand=="-" or brand=="--" or brand=="---" or brand=="none" or brand=="null" or brand=="nan" or brand==None:
                 return [0.00,0.00,0.00]
+            if ip in ["10.213.33.184","10.213.35.86","10.213.35.87"]:
+                try:
+                    return fc2(ip,"ADMIN","ADMIN@123")[0]
+                except Exception as e:
+                    logging.error("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
+                    return [0.00,0.00,0.00]
             if hostname not in self.zd2:
                 return [0.00,0.00,0.00]
             username=self.zd2[hostname][0];password=self.zd2[hostname][1]
@@ -282,7 +289,7 @@ class Run:
             else:
                 logging.error("="*50+"\n"+"未知品牌"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+"="*50)
             return [0.00,0.00,0.00]
-        except:
+        except Exception as e:
             logging.error("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
             return [0.00,0.00,0.00]
 
