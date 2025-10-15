@@ -80,9 +80,9 @@ def get_relationship(config,city_ObjectId):
         del zd[i]
     return zd
 
-def get_ObjectId(city_name):
+def get_ObjectId(config,city_name):
     conn=Connect_Mongodb(config)
-    city_ObjectId=conn.get_collection("cds_ci_att_value_position",{"status":1,"city":"庆阳"},{"_id":1})["_id"].values.tolist()[0]
+    city_ObjectId=conn.get_collection("cds_ci_att_value_position",{"status":1,"city":city_name},{"_id":1})["_id"].values.tolist()[0]
     return city_ObjectId
 
 if __name__=="__main__":
@@ -98,5 +98,5 @@ if __name__=="__main__":
             "PASSWORD":"cds-cloud@2017"
         }
     }
-    zd=get_relationship(config,get_ObjectId("庆阳"))
+    zd=get_relationship(config,get_ObjectId(config,"庆阳"))
     print(zd)
