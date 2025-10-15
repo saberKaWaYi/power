@@ -134,6 +134,8 @@ def demo(lt):
     a=sum([i[0]*i[2] for i in lt])/c
     return [round(a,2),round(b,2),round(c,2)]
 
+import urllib
+
 @api_view(['POST'])
 def rack_power(request):
     zd={};zd["code"]=200;zd["msg"]="";zd["data"]={}
@@ -190,41 +192,38 @@ from django.http import FileResponse
 def rack_power_excel(request):
     zd={};zd["code"]=200;zd["msg"]="";zd["data"]={}
     zd["data"]["power_data"]=[]
-    try:
-        begin_time=request.data["begin_time"];end_time=request.data["end_time"]
-        city=request.data["city"];data_center=request.data["data_center"];room=request.data["room"];rack=request.data["rack"]
-        query=f'''
-        SELECT voltage,current,power,ts FROM power.power_data WHERE ts >='{begin_time}' AND ts<='{end_time}' AND city='{city}' AND data_center='{data_center}' AND room='{room}' AND rack='{rack}' ORDER BY ts ASC
-        '''
-        conn=Connect_Clickhouse(config)
-        client=conn.client
-        data=conn.query(query)[["voltage","current","power","ts"]].values.tolist()
-        temp={}
-        for i in data:
-            if i[3] not in temp:
-                temp[i[3]]=[]
-            temp[i[3]].append([eval(i[0]),eval(i[1]),eval(i[2])])
-        for i in temp:
-            temp[i]=demo(temp[i])
-        data=[]
-        for i in temp:
-            data.append([temp[i][0],temp[i][1],temp[i][2],i])
-        data=pd.DataFrame(data,columns=["voltage(V)","current(A)","power(KW)","ts"])
-        temp_dir=os.path.join(os.getcwd(),"temp_files")
-        os.makedirs(temp_dir,exist_ok=True)
-        temp_file=tempfile.NamedTemporaryFile(
-            suffix='.xlsx',
-            delete=False,
-            dir=os.path.join(os.getcwd(),"temp_files")
-        )
-        temp_file.close()
-        with pd.ExcelWriter(temp_file.name) as writer:
-            data.to_excel(writer,index=False)
-        response=FileResponse(open(temp_file.name,'rb'))
-        response['Content-Type']='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        response['Content-Disposition']=f'attachment; filename=graph_data_{int(time.time())}.xlsx'
-        response.delete=True
-        return response
-    except:
-        pass
-    return Response(zd)
+    begin_time=request.data["begin_time"];end_time=request.data["end_time"]
+    city=request.data["city"];data_center=request.data["data_center"];room=request.data["room"];rack=request.data["rack"]
+    query=f'''
+    SELECT voltage,current,power,ts FROM power.power_data WHERE ts >='{begin_time}' AND ts<='{end_time}' AND city='{city}' AND data_center='{data_center}' AND room='{room}' AND rack='{rack}' ORDER BY ts ASC
+    '''
+    conn=Connect_Clickhouse(config)
+    client=conn.client
+    data=conn.query(query)[["voltage","current","power","ts"]].values.tolist()
+    temp={}
+    for i in data:
+        if i[3] not in temp:
+            temp[i[3]]=[]
+        temp[i[3]].append([eval(i[0]),eval(i[1]),eval(i[2])])
+    for i in temp:
+        temp[i]=demo(temp[i])
+    data=[]
+    for i in temp:
+        data.append([temp[i][0],temp[i][1],temp[i][2],i])
+    data=pd.DataFrame(data,columns=["voltage(V)","current(A)","power(KW)","ts"])
+    temp_dir=os.path.join(os.getcwd(),"temp_files")
+    os.makedirs(temp_dir,exist_ok=True)
+    temp_file=tempfile.NamedTemporaryFile(
+        suffix='.xlsx',
+        delete=False,
+        dir=os.path.join(os.getcwd(),"temp_files")
+    )
+    temp_file.close()
+    with pd.ExcelWriter(temp_file.name) as writer:
+        data.to_excel(writer,index=False)
+    response=FileResponse(open(temp_file.name,'rb'))
+    response['Content-Type']='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    filename=f"{city}_{data_center}_{room}_{rack}_from_{begin_time}_to_{end_time}_{int(time.time())}"
+    response['Content-Disposition']=f'attachment; filename="{urllib.parse.quote(filename)}"'
+    response.delete=True
+    return response
