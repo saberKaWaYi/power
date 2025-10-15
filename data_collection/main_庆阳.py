@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor,as_completed
 import requests
 import subprocess
 from redfish import *
+from tool import fc2
 
 log_dir="logs"
 if not os.path.exists(log_dir):
@@ -39,15 +40,13 @@ class Run:
         self.result=[]
 
     def run(self):
-        with ThreadPoolExecutor(max_workers=100) as executor:
+        with ThreadPoolExecutor(max_workers=300) as executor:
             pool=[]
             for i in self.zd1:
-                pool.append(executor.submit(self.fc,i))
+                for j in self.zd1[i]:
+                    pool.append(executor.submit(self.fc,[i,j]))
             for task in as_completed(pool):
-                try:
-                    task.result()
-                except Exception as e:
-                    logging.error(e)
+                task.result()
         conn=Connect_Clickhouse(self.config3)
         client=conn.client
         insert_sql="""
@@ -66,27 +65,27 @@ class Run:
         insert_sql+=",".join(values)
         client.execute(insert_sql)
 
-    def fc(self,key):
-        for value in self.zd1[key]:
-            temp_zd={}
-            temp_lt=key.split("|")
-            temp_zd["city"]=temp_lt[0];temp_zd["data_center"]=temp_lt[1];temp_zd["room"]=temp_lt[2];temp_zd["rack"]=temp_lt[3]
-            if value[-1]=="network":
-                temp=self.fc1([value[0],value[1],value[2]])
-            elif value[-1]=="server":
-                temp=self.fc2([value[0],value[1],value[2]])
-            else:
-                logging.error("="*50+"/n"+f"{value[-1]}未知type。/n"+"="*50)
-                continue
-            temp_zd["hostname"]=value[0]
-            temp_zd["ts"]=self.time_
-            temp_zd["voltage"]=temp[0]
-            temp_zd["current"]=temp[1]
-            temp_zd["power"]=temp[2]
-            temp_zd["ip"]=value[1]
-            temp_zd["brand"]=value[2]
-            temp_zd["type"]=value[-1]
-            self.result.append(temp_zd)
+    def fc(self,info):
+        key=info[0];value=info[1]
+        temp_zd={}
+        temp_lt=key.split("|")
+        temp_zd["city"]=temp_lt[0];temp_zd["data_center"]=temp_lt[1];temp_zd["room"]=temp_lt[2];temp_zd["rack"]=temp_lt[3]
+        if value[-1]=="network":
+            temp=self.fc1([value[0],value[1],value[2]])
+        elif value[-1]=="server":
+            temp=self.fc2([value[0],value[1],value[2]])
+        else:
+            logging.error("="*50+"/n"+f"{value[-1]}未知type。/n"+"="*50)
+            return
+        temp_zd["hostname"]="-".join([i.strip() for i in value[0].split("-")])
+        temp_zd["ts"]=self.time_
+        temp_zd["voltage"]=temp[0]
+        temp_zd["current"]=temp[1]
+        temp_zd["power"]=temp[2]
+        temp_zd["ip"]=value[1].strip()
+        temp_zd["brand"]=value[2].lower().strip()
+        temp_zd["type"]=value[-1]
+        self.result.append(temp_zd)
 
     def fc1(self,info):
         try:
@@ -224,6 +223,12 @@ class Run:
                 return [0.00,0.00,0.00]
             if brand=="" or brand=="-" or brand=="--" or brand=="---" or brand=="none" or brand=="null" or brand=="nan" or brand==None:
                 return [0.00,0.00,0.00]
+            if ip in ["10.213.33.184","10.213.35.86","10.213.35.87"]:
+                try:
+                    return fc2(ip,"ADMIN","ADMIN@123")[0]
+                except Exception as e:
+                    logging.error("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
+                    return [0.00,0.00,0.00]
             if hostname not in self.zd2:
                 return [0.00,0.00,0.00]
             username=self.zd2[hostname][0];password=self.zd2[hostname][1]
@@ -284,7 +289,7 @@ class Run:
             else:
                 logging.error("="*50+"\n"+"未知品牌"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+"="*50)
             return [0.00,0.00,0.00]
-        except:
+        except Exception as e:
             logging.error("="*50+"\n"+"未知错误"+"\n"+hostname+"\n"+ip+"\n"+brand+"\n"+str(e)+"\n"+"="*50)
             return [0.00,0.00,0.00]
 
