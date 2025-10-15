@@ -219,8 +219,7 @@ def rack_power_excel(request):
         )
         temp_file.close()
         with pd.ExcelWriter(temp_file.name) as writer:
-            data.to_excel(writer,sheet_name='nodes',index=False)
-            data.to_excel(writer,sheet_name='edges',index=False)
+            data.to_excel(writer,index=False)
         response=FileResponse(open(temp_file.name,'rb'))
         response['Content-Type']='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         response['Content-Disposition']=f'attachment; filename=graph_data_{int(time.time())}.xlsx'
