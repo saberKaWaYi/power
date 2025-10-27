@@ -225,7 +225,6 @@ def rack_power_excel(request):
     response.delete=True
     return response
 
-import csv
 import threading
 
 @api_view(['POST'])
@@ -247,7 +246,6 @@ def power_csv_all(request):
     )
     temp_file.close()
     with open(temp_file.name,"w",newline="",encoding="utf-8") as f:
-        writer=csv.writer(f)
         header_written=False
         while True:
             query_temp=query+str(offset)
@@ -255,7 +253,7 @@ def power_csv_all(request):
             if data.empty:
                 break
             if not header_written:
-                writer.writerow(data.columns.to_list())
+                data.to_csv(f,header=True,index=False)
                 header_written=True
             else:
                 data.to_csv(f,header=False,index=False)
