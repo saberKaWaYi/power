@@ -258,7 +258,7 @@ def power_csv_all(request):
                 writer.writerow(data.columns.to_list())
                 header_written=True
             else:
-                data.to_csv(f,header=True,index=False)
+                data.to_csv(f,header=False,index=False)
             del data
             offset+=batch_size
     def delete_temp_file():
